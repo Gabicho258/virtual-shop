@@ -1,4 +1,9 @@
-import { QuantitySelector, SizeSelector } from "@/components";
+import {
+  ProductMobileSlideShow,
+  ProductSlideShow,
+  QuantitySelector,
+  SizeSelector,
+} from "@/components";
 import { monserrat } from "@/config/fonts";
 import { initialData } from "@/seed/seed";
 import { notFound } from "next/navigation";
@@ -9,8 +14,8 @@ interface Props {
   };
 }
 
-export default function ProductPage({ params }: Props) {
-  const { slug } = params;
+export default async function ProductPage({ params }: Props) {
+  const { slug } = await params;
   const product = initialData.products.find((product) => product.slug === slug);
   if (!product) {
     notFound();
@@ -20,7 +25,18 @@ export default function ProductPage({ params }: Props) {
     <div className="mt-5 mb-20 grid grid-cols-1 md:grid-cols-3 gap-3">
       {/* Sildes */}
       <div className="col-span-1 md:col-span-2">
-        <h1>asd</h1>
+        {/* mobile slideshow */}
+        <ProductMobileSlideShow
+          title={product.title}
+          images={product.images}
+          className="block md:hidden"
+        />
+        {/* desktop slideshow */}
+        <ProductSlideShow
+          title={product.title}
+          images={product.images}
+          className="md:block hidden"
+        />
       </div>
       <div className="col-span-1 px-5">
         <h1 className={`${monserrat.className} antialiased font-bold text-xl`}>
