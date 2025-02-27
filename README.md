@@ -1,3 +1,19 @@
+
+## Start the project
+
+1. Clone the project.
+2. Rename the `.env.templates` file to `.env` and fill the variables.
+3. Run `npm install` to install the dependencies.
+4. Run the database `docker compose up -d`.
+5. Run prisma migrations `npx prisma migrate dev`.
+6. Run `npm run dev` to start the project.
+7. 
+
+
+
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
