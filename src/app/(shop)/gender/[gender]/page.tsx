@@ -7,12 +7,12 @@ import { Gender } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 interface Props {
-  params: {
+  params: Promise<{
     gender: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     page?: string;
-  };
+  }>;
 }
 
 export default async function CategoryPage({ params, searchParams }: Props) {

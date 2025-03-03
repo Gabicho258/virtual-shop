@@ -9,9 +9,9 @@ import { initialData } from "@/seed/seed";
 import { notFound } from "next/navigation";
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default async function ProductPage({ params }: Props) {
