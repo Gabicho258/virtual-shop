@@ -3,7 +3,10 @@ import "./globals.css";
 import { geistMono, geistSans } from "@/config/fonts";
 
 export const metadata: Metadata = {
-  title: "Virtual | Shop",
+  title: {
+    template: "%s - Virtual | Shop",
+    default: "Home - Virtual | Shop",
+  },
   description: "Virtual shop for products",
 };
 

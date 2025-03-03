@@ -1,11 +1,14 @@
+import type { Metadata } from "next";
+
+import { getProductBySlug } from "@/actions";
 import {
   ProductMobileSlideShow,
   ProductSlideShow,
   QuantitySelector,
   SizeSelector,
+  StockLabel,
 } from "@/components";
 import { monserrat } from "@/config/fonts";
-import { initialData } from "@/seed/seed";
 import { notFound } from "next/navigation";
 
 interface Props {
@@ -14,9 +17,24 @@ interface Props {
   }>;
 }
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+  return {
+    title: product?.title,
+    description: product?.description,
+    openGraph: {
+      title: product?.title,
+      description: product?.description,
+      images: [`/products/${product?.images[1]}`],
+    },
+  };
+}
+
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const product = initialData.products.find((product) => product.slug === slug);
+  const product = await getProductBySlug(slug);
+  // const product = initialData.products.find((product) => product.slug === slug);
   if (!product) {
     notFound();
   }
@@ -39,6 +57,7 @@ export default async function ProductPage({ params }: Props) {
         />
       </div>
       <div className="col-span-1 px-5">
+        <StockLabel slug={product.slug} />
         <h1 className={`${monserrat.className} antialiased font-bold text-xl`}>
           {product.title}
         </h1>
