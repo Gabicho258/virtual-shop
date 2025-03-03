@@ -1,4 +1,5 @@
 // import { notFound } from "next/navigation";
+export const revalidate = 60;
 
 import { getPaginatedProductsWithImages } from "@/actions";
 import { Pagination, ProductGrid, Title } from "@/components";
@@ -16,7 +17,6 @@ interface Props {
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { gender } = await params;
-
   const { page: searchParamsPage } = await searchParams;
 
   const page = searchParamsPage ? parseInt(searchParamsPage) : 1;
