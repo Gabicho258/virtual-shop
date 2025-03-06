@@ -1,14 +1,15 @@
 import { initialData } from "./seed";
 import prisma from "../lib/prisma";
 async function main() {
-  await Promise.all([
-    prisma.product.deleteMany(),
-    prisma.productImage.deleteMany(),
-    prisma.category.deleteMany(),
-  ]); // puede haber un error por la FK, en caso falla se debe poner await separados
+  // await Promise.all([
+  await prisma.user.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.productImage.deleteMany();
+  await prisma.category.deleteMany();
+  // ]); // puede haber un error por la FK, en caso falla se debe poner await separados
   // category
 
-  const { categories, products } = initialData;
+  const { categories, products, users } = initialData;
 
   const categoriesData = categories.map((category) => ({
     name: category,
@@ -44,6 +45,7 @@ async function main() {
     });
   });
 
+  await prisma.user.createMany({ data: users });
   console.log("Seed executed successfully");
 }
 
