@@ -1,14 +1,15 @@
 "use client";
 
 import { authenticate } from "@/actions";
+import clsx from "clsx";
 import Link from "next/link";
 import { useActionState } from "react";
+import { IoInformationOutline } from "react-icons/io5";
 // import { useFormState } from "react-dom";
 
 export const LoginForm = () => {
-  const [state, dispath] = useActionState(authenticate, undefined);
+  const [state, dispath, isPending] = useActionState(authenticate, undefined);
 
-  console.log(state);
   return (
     <form action={dispath} className="flex flex-col">
       <label htmlFor="email">E-mail</label>
@@ -24,8 +25,21 @@ export const LoginForm = () => {
         type="password"
         name="password"
       />
+      {state && (
+        <div className="flex flex-row mb-2">
+          <IoInformationOutline className="h-5 w-5 text-red-500" />
+          <p className="text-sm text-red-500">{state}</p>
+        </div>
+      )}
 
-      <button className="btn-primary" type="submit">
+      <button
+        className={clsx({
+          "btn-primary": !isPending,
+          "btn-disabled": isPending,
+        })}
+        type="submit"
+        disabled={isPending}
+      >
         Log In
       </button>
 
