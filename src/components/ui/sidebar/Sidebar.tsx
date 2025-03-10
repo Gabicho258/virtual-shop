@@ -3,6 +3,7 @@
 import { logout } from "@/actions";
 import { useUIStore } from "@/store";
 import clsx from "clsx";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
   IoCloseOutline,
@@ -18,6 +19,17 @@ import {
 export const Sidebar = () => {
   const isSideMenuOpen = useUIStore((state) => state.isSideMenuOpen);
   const closeMenu = useUIStore((state) => state.closeSideMenu);
+
+  const { data: session } = useSession();
+
+  const isAuthenticated = !!session?.user;
+  const isAdmin = session?.user.role === "admin";
+
+  const onLogout = async () => {
+    await logout();
+    window.location.reload();
+    closeMenu();
+  };
 
   return (
     <div>
@@ -73,51 +85,58 @@ export const Sidebar = () => {
           <IoTicketOutline size={30} />
           <span className="ml-3 text-xl">Orders</span>
         </Link>
-        <Link
-          href={"/auth/login"}
-          onClick={() => closeMenu()}
-          className="flex items-center mt-10 p-2 hover:bg-gray-100 rounded transition-all"
-        >
-          <IoLogInOutline size={30} />
-          <span className="ml-3 text-xl">Log In</span>
-        </Link>
-        <button
-          // href={"/"}
-          onClick={() => {
-            logout();
-            closeMenu();
-          }}
-          className="flex w-full items-center mt-10 p-2 hover:bg-gray-100 rounded transition-all"
-        >
-          <IoLogOutOutline size={30} />
-          <span className="ml-3 text-xl">Log Out</span>
-        </button>
-        <div className="w-full h-px bg-gray-200 my-10" />
-        <Link
-          href={"/"}
-          onClick={() => closeMenu()}
-          className="flex items-center mt-10 p-2 hover:bg-gray-100 rounded transition-all"
-        >
-          <IoShirtOutline size={30} />
-          <span className="ml-3 text-xl">Products</span>
-        </Link>
-        <Link
-          href={"/"}
-          onClick={() => closeMenu()}
-          className="flex items-center mt-10 p-2 hover:bg-gray-100 rounded transition-all"
-        >
-          <IoTicketOutline size={30} />
-          <span className="ml-3 text-xl">Orders</span>
-        </Link>
-        <Link
-          href={"/"}
-          className="flex items-center mt-10 p-2 hover:bg-gray-100 rounded transition-all"
-          onClick={() => closeMenu()}
-        >
-          <IoPeopleOutline size={30} />
+        {!isAuthenticated && (
+          <Link
+            href={"/auth/login"}
+            onClick={() => closeMenu()}
+            className="flex items-center mt-10 p-2 hover:bg-gray-100 rounded transition-all"
+          >
+            <IoLogInOutline size={30} />
+            <span className="ml-3 text-xl">Log In</span>
+          </Link>
+        )}
 
-          <span className="ml-3 text-xl">Users</span>
-        </Link>
+        {isAuthenticated && (
+          <button
+            // href={"/"}
+            onClick={onLogout}
+            className="flex w-full items-center mt-10 p-2 hover:bg-gray-100 rounded transition-all"
+          >
+            <IoLogOutOutline size={30} />
+            <span className="ml-3 text-xl">Log Out</span>
+          </button>
+        )}
+
+        {isAdmin && (
+          <>
+            <div className="w-full h-px bg-gray-200 my-10" />
+            <Link
+              href={"/"}
+              onClick={() => closeMenu()}
+              className="flex items-center mt-10 p-2 hover:bg-gray-100 rounded transition-all"
+            >
+              <IoShirtOutline size={30} />
+              <span className="ml-3 text-xl">Products</span>
+            </Link>
+            <Link
+              href={"/"}
+              onClick={() => closeMenu()}
+              className="flex items-center mt-10 p-2 hover:bg-gray-100 rounded transition-all"
+            >
+              <IoTicketOutline size={30} />
+              <span className="ml-3 text-xl">Orders</span>
+            </Link>
+            <Link
+              href={"/"}
+              className="flex items-center mt-10 p-2 hover:bg-gray-100 rounded transition-all"
+              onClick={() => closeMenu()}
+            >
+              <IoPeopleOutline size={30} />
+
+              <span className="ml-3 text-xl">Users</span>
+            </Link>
+          </>
+        )}
       </nav>
     </div>
   );

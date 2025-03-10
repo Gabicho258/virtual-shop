@@ -9,6 +9,9 @@ import { IoInformationOutline } from "react-icons/io5";
 
 export const LoginForm = () => {
   const [state, dispath, isPending] = useActionState(authenticate, undefined);
+  if (state === "Success") {
+    window.location.replace("/");
+  }
 
   return (
     <form action={dispath} className="flex flex-col">
@@ -25,7 +28,7 @@ export const LoginForm = () => {
         type="password"
         name="password"
       />
-      {state && (
+      {state === "Invalid credentials." && (
         <div className="flex flex-row mb-2">
           <IoInformationOutline className="h-5 w-5 text-red-500" />
           <p className="text-sm text-red-500">{state}</p>
