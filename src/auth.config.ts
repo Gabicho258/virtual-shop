@@ -5,12 +5,43 @@ import { z } from "zod";
 import prisma from "./lib/prisma";
 import bcrypt from "bcryptjs";
 
+const authenticatedRoutes = ["/auth/login", "/auth/new-account"];
+
+const checkoutAddressRoute = ["/checkout/address"];
+
 export const authConfig: NextAuthConfig = {
   pages: {
     signIn: "/auth/login",
     newUser: "auth/new-account",
   },
+
   callbacks: {
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+
+      const authRoutes = authenticatedRoutes.some((item) =>
+        nextUrl.pathname.includes(item)
+      );
+      const checkoutRoutes = checkoutAddressRoute.some((item) =>
+        nextUrl.pathname.includes(item)
+      );
+
+      if (authRoutes && isLoggedIn) {
+        return Response.redirect(new URL("/", nextUrl));
+      }
+
+      if (checkoutRoutes) {
+        if (isLoggedIn) {
+          return true;
+        }
+        return Response.redirect(
+          new URL(`/auth/login?origin=${nextUrl.pathname}`, nextUrl)
+        );
+      }
+
+      return true;
+    },
+
     jwt({ token, user }) {
       if (user) {
         token.data = user;
