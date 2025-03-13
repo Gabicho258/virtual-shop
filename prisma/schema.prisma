@@ -37,6 +37,8 @@ model User {
   password      String
   role          Rol       @default(user)
   image         String?
+
+  address UserAddress?
 }
 
 model Category {
@@ -73,6 +75,24 @@ model ProductImage {
 }
 
 model Country {
-  id   String @id
-  name String @unique
+  id          String        @id
+  name        String        @unique
+  UserAddress UserAddress[]
+}
+
+model UserAddress {
+  id         String  @id @default(uuid())
+  firstName  String
+  lastName   String
+  address    String
+  address2   String?
+  postalCode String
+  city       String
+  phone      String
+
+  country   Country @relation(fields: [countryId], references: [id])
+  countryId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
 }
