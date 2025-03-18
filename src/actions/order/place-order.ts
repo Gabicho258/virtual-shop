@@ -49,6 +49,85 @@ export const placeOrder = async (
     },
     { subTotal: 0, tax: 0, total: 0 }
   );
+  try {
+    const prismaTx = await prisma.$transaction(async (tx) => {
+      // Update product stock
+      const updatedProductsPromises = products.map(async (product) => {
+        const productQuantity = productIds
+          .filter((p) => p.productId === product.id)
+          .reduce((acc, item) => item.quantity + acc, 0);
 
-  console.log({ subTotal, tax, total });
+        if (productQuantity === 0) {
+          throw new Error(`${product.id} does not have enough inventory`);
+        }
+        return tx.product.update({
+          where: { id: product.id },
+          data: {
+            // inStock: product.inStock - productQuantity, don't do
+            inStock: {
+              decrement: productQuantity,
+            },
+          },
+        });
+      });
+
+      const updatedProducts = await Promise.all(updatedProductsPromises);
+
+      updatedProducts.forEach((product) => {
+        if (product.inStock < 0) {
+          throw new Error(`${product.title} does not have enough inventory`);
+        }
+      });
+
+      // Create Order header and details
+
+      const order = await tx.order.create({
+        data: {
+          userId: session.user.id,
+          itemsInOrder: itemsInOrder,
+          subTotal: subTotal,
+          tax: tax,
+          total: total,
+          OrderItem: {
+            createMany: {
+              data: productIds.map((product) => {
+                return {
+                  quantity: product.quantity,
+                  size: product.size,
+                  productId: product.productId,
+                  price:
+                    products.find((p) => p.id === product.productId)?.price ??
+                    0,
+                };
+              }),
+            },
+          },
+        },
+      });
+
+      // Create address delivery
+
+      const { country, ...restAddress } = address;
+      const orderAddress = await tx.orderAddress.create({
+        data: {
+          orderId: order.id,
+          countryId: country,
+          ...restAddress,
+        },
+      });
+
+      return {
+        order: order,
+        orderAddress: orderAddress,
+        updatedProducts: updatedProducts,
+      };
+    });
+    return { ok: true, order: prismaTx.order, prismaTx };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return {
+      ok: false,
+      message: error.message,
+    };
+  }
 };

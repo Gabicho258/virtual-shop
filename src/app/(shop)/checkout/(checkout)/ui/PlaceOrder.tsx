@@ -4,15 +4,20 @@ import { placeOrder } from "@/actions";
 import { useAddressStore, useCartStore } from "@/store";
 import { currencyFormat } from "@/utils";
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/shallow";
 
 export const PlaceOrder = () => {
   const [loaded, setLoaded] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const router = useRouter();
 
   const address = useAddressStore((state) => state.address);
   const cart = useCartStore((state) => state.cart);
+  const clearCart = useCartStore((state) => state.clearCart);
 
   const { subTotal, tax, total, totalItems } = useCartStore(
     useShallow((state) => state.getSummaryInformation())
@@ -29,9 +34,16 @@ export const PlaceOrder = () => {
       quantity: product.quantity,
       size: product.size,
     }));
-    console.log({ address, productsToOrder });
 
-    const rest = await placeOrder(productsToOrder, address);
+    const resp = await placeOrder(productsToOrder, address);
+    console.log(resp);
+    if (!resp.ok) {
+      setIsPlacingOrder(false);
+      setErrorMessage(resp.message);
+      return;
+    }
+    clearCart();
+    router.replace(`/orders/${resp.order?.id}`);
   };
 
   if (!loaded) return <div>Loading...</div>;
@@ -77,7 +89,7 @@ export const PlaceOrder = () => {
             </a>
           </span>
         </p>
-        {/* <p className="text-red-500">Error placing order</p> */}
+        <p className="text-red-500 mb-5">{errorMessage}</p>
         <button
           //   href={"/orders/123"}
           onClick={onPlaceOrder}
