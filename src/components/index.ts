@@ -12,4 +12,5 @@ export * from "./ui/footer/Footer";
 export * from "./ui/pagination/Pagination";
 export * from "./product/stock-label/StockLabel";
 
-export * from "./provider/Provider";
+export * from "./providers/Provider";
+export * from "./paypal/PayPalButton";
