@@ -1,6 +1,8 @@
 "use server";
 
 import { PayPalOrderStatusResponse } from "@/interfaces";
+import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export const paypalCheckPayment = async (transactionId: string) => {
   const authToken = await getPaypalBearerToken();
@@ -12,13 +14,28 @@ export const paypalCheckPayment = async (transactionId: string) => {
     return { ok: false, message: "Can not verify payment" };
   }
   const { status, purchase_units } = resp;
-  //   const {} = purchase_units[0]
+  const { invoice_id: orderId } = purchase_units[0];
 
   if (status !== "COMPLETED") {
     return { ok: false, message: "Payment not completed" };
   }
 
-  console.log({ status, purchase_units });
+  try {
+    console.log({ status, purchase_units });
+    await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        isPaid: true,
+        paidAt: new Date(),
+      },
+    });
+    revalidatePath(`/orders/${orderId}`);
+  } catch (error) {
+    console.log(error);
+    return { ok: false, message: "Payment can not be done" };
+  }
 };
 
 const getPaypalBearerToken = async (): Promise<string | null> => {
@@ -45,9 +62,10 @@ const getPaypalBearerToken = async (): Promise<string | null> => {
   };
 
   try {
-    const resolve = await fetch(`${OAUTH2_URL}`, requestOptions).then(
-      (response) => response.json()
-    );
+    const resolve = await fetch(`${OAUTH2_URL}`, {
+      ...requestOptions,
+      cache: "no-store",
+    }).then((response) => response.json());
     return resolve.access_token;
   } catch (error) {
     console.log(error);
@@ -70,9 +88,10 @@ const verifyPayPalPayment = async (
   };
 
   try {
-    const resolve = await fetch(PAYPAL_ORDER_URL, requestOptions).then((resp) =>
-      resp.json()
-    );
+    const resolve = await fetch(PAYPAL_ORDER_URL, {
+      ...requestOptions,
+      cache: "no-store",
+    }).then((resp) => resp.json());
 
     return resolve;
   } catch (error) {
