@@ -27,7 +27,7 @@ export type Type = "shirts" | "pants" | "hoodies" | "hats";
 export type Category = "men" | "women" | "kid" | "unisex";
 
 export interface ProductImage {
-  id: string;
+  id: number;
   url: string;
   productId: string;
 }

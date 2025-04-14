@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 
 interface Props {
-  product: Product & { ProductImage: ProductImage[] };
+  product: Partial<Product> & { ProductImage?: ProductImage[] };
   categories: CategoryProduct[];
 }
 
@@ -36,7 +36,7 @@ export const ProductForm = ({ product, categories }: Props) => {
   } = useForm<FormInputs>({
     defaultValues: {
       ...product,
-      tags: product.tags.join(", "),
+      tags: product.tags?.join(", "),
       sizes: product.sizes ?? [],
 
       // title: product.title,
@@ -65,7 +65,9 @@ export const ProductForm = ({ product, categories }: Props) => {
   const onSubmit = async (data: FormInputs) => {
     const formData = new FormData();
     const { ...productToSave } = data;
-    formData.append("id", product.id ?? "");
+    if (product.id) {
+      formData.append("id", product.id ?? "");
+    }
     formData.append("title", productToSave.title);
     formData.append("slug", productToSave.slug);
     formData.append("description", productToSave.description);
@@ -175,6 +177,14 @@ export const ProductForm = ({ product, categories }: Props) => {
 
       {/* Selector de tallas y fotos */}
       <div className="w-full">
+        <div className="flex flex-col mb-2">
+          <span>Stock</span>
+          <input
+            type="number"
+            className="p-2 border rounded-md bg-gray-200"
+            {...register("inStock", { required: true, min: 0 })}
+          />
+        </div>
         {/* As checkboxes */}
         <div className="flex flex-col">
           <span>Tallas</span>
@@ -206,10 +216,10 @@ export const ProductForm = ({ product, categories }: Props) => {
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {product.ProductImage.map((image) => (
+            {product.ProductImage?.map((image) => (
               <div key={image.id}>
                 <Image
-                  alt={product.title}
+                  alt={product.title ?? ""}
                   src={`/products/${image.url}`}
                   width={300}
                   height={300}
