@@ -11,14 +11,13 @@ export const StockLabel = ({ slug }: Props) => {
   const [stock, setStock] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
+    const getStock = async () => {
+      const stock = await getStockBySlug(slug);
+      setStock(stock);
+      setIsLoading(false);
+    };
     getStock();
-  }, []);
-
-  const getStock = async () => {
-    const stock = await getStockBySlug(slug);
-    setStock(stock);
-    setIsLoading(false);
-  };
+  }, [slug]);
 
   if (isLoading) {
     return <div className="animate-pulse bg-gray-200">&nbsp;</div>;

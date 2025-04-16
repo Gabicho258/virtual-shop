@@ -59,7 +59,7 @@ export const AddressForm = ({ countries, userStoredAddress = {} }: Props) => {
     if (storedAddress.firstName) {
       reset(storedAddress);
     }
-  }, [storedAddress]);
+  }, [reset, storedAddress]);
 
   return (
     <form
